@@ -4,10 +4,8 @@ import net.gigabit101.rebornstorage.client.screens.AdvancedWirelessTransmitterSc
 import net.gigabit101.rebornstorage.client.screens.ScreenMultiCrafter;
 import net.minecraft.client.gui.screens.MenuScreens;
 
-public class ModScreens
-{
-    public static void init()
-    {
+public class ModScreens {
+    public static void init() {
         MenuScreens.register(ModContainers.MULTI_CRAFTER_CONTAINER.get(), ScreenMultiCrafter::new);
         MenuScreens.register(ModContainers.ADVANCED_WIRELESS_CONTAINER.get(), AdvancedWirelessTransmitterScreen::new);
     }

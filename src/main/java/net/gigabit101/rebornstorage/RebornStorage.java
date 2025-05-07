@@ -53,8 +53,7 @@ import javax.swing.text.TabExpander;
 import javax.swing.text.TextAction;
 
 @Mod(Constants.MOD_ID)
-public class RebornStorage
-{
+public class RebornStorage {
     @RSAPIInject
     public static IRSAPI RSAPI;
 
@@ -62,8 +61,7 @@ public class RebornStorage
 
     public static RebornStorage INSTANCE;
 
-    public RebornStorage()
-    {
+    public RebornStorage() {
         INSTANCE = this;
         IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
         RebornStorageConfig.loadConfig(RebornStorageConfig.COMMON_CONFIG, FMLPaths.CONFIGDIR.get().resolve(Constants.MOD_ID + "-common.toml"));
@@ -84,8 +82,7 @@ public class RebornStorage
     }
 
     @SubscribeEvent
-    public void preInit(FMLCommonSetupEvent event)
-    {
+    public void preInit(FMLCommonSetupEvent event) {
         PacketHandler.register();
         API.instance().getNetworkNodeRegistry().add(Constants.MULTI_BLOCK_ID, (tag, world, pos) ->
         {
@@ -98,8 +95,7 @@ public class RebornStorage
     }
 
     @SubscribeEvent
-    public void clientInit(FMLClientSetupEvent event)
-    {
+    public void clientInit(FMLClientSetupEvent event) {
         ModScreens.init();
         MinecraftForge.EVENT_BUS.register(new MultiblockClientTickHandler());
         ItemBlockRenderTypes.setRenderLayer(ModBlocks.BLOCK_ADVANCED_WIRELESS_TRANSMITTER.get(), RenderType.cutout());
@@ -108,33 +104,26 @@ public class RebornStorage
     }
 
     @SubscribeEvent
-    public void onKeyInput(InputEvent.KeyInputEvent e)
-    {
-        if (Minecraft.getInstance().player != null)
-        {
-            if (KeyBindings.OPEN_WIRELESS_CRAFTING_GRID.consumeClick())
-            {
+    public void onKeyInput(InputEvent.KeyInputEvent e) {
+        if (Minecraft.getInstance().player != null) {
+            if (KeyBindings.OPEN_WIRELESS_CRAFTING_GRID.consumeClick()) {
                 KeyInputListener.findAndOpen(ModItems.WIRELESS_GRID.get(), ModItems.CREATIVE_WIRELESS_GRID.get());
             }
-            if (KeyBindings.MODE_SWITCH_WIRELESS_CRAFTING_GRID.consumeClick() && e.getAction() == 1)
-            {
+            if (KeyBindings.MODE_SWITCH_WIRELESS_CRAFTING_GRID.consumeClick() && e.getAction() == 1) {
                 PacketHandler.sendToServer(new PacketChangeMode());
             }
         }
     }
 
-    public static MultiBlockCrafter getMultiBlock(Level world, BlockPos pos)
-    {
+    public static MultiBlockCrafter getMultiBlock(Level world, BlockPos pos) {
         BlockEntity tileEntity = world.getBlockEntity(pos);
-        if (tileEntity instanceof BlockEntityMultiCrafter)
-        {
+        if (tileEntity instanceof BlockEntityMultiCrafter) {
             return (MultiBlockCrafter) ((BlockEntityMultiCrafter) tileEntity).getMultiblockController();
         }
         return null;
     }
 
-    private static INetworkNode readAndReturn(CompoundTag tag, NetworkNode node)
-    {
+    private static INetworkNode readAndReturn(CompoundTag tag, NetworkNode node) {
         node.read(tag);
         return node;
     }

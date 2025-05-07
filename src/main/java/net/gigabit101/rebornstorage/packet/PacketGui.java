@@ -13,42 +13,34 @@ import net.minecraftforge.network.NetworkHooks;
 
 import java.util.function.Supplier;
 
-public class PacketGui
-{
+public class PacketGui {
     private final int page;
     private final BlockPos blockPos;
 
-    public PacketGui(int page, BlockPos blockPos)
-    {
+    public PacketGui(int page, BlockPos blockPos) {
         this.page = page;
         this.blockPos = blockPos;
     }
 
-    public static void encode(PacketGui packetGui, FriendlyByteBuf buf)
-    {
+    public static void encode(PacketGui packetGui, FriendlyByteBuf buf) {
         buf.writeInt(packetGui.page);
         buf.writeBlockPos(packetGui.blockPos);
     }
 
-    public static PacketGui decode(FriendlyByteBuf buf)
-    {
+    public static PacketGui decode(FriendlyByteBuf buf) {
         return new PacketGui(buf.readInt(), buf.readBlockPos());
     }
 
-    public static class Handler
-    {
-        public static void handle(final PacketGui message, Supplier<NetworkEvent.Context> ctx)
-        {
+    public static class Handler {
+        public static void handle(final PacketGui message, Supplier<NetworkEvent.Context> ctx) {
             ctx.get().enqueueWork(() ->
             {
                 ServerPlayer player = ctx.get().getSender();
                 if (player == null) return;
 
                 BlockEntity blockEntity = player.getLevel().getBlockEntity(message.blockPos);
-                if (blockEntity != null && blockEntity instanceof BlockEntityMultiCrafter blockEntityMultiCrafter && blockEntityMultiCrafter.getMultiBlock().isAssembled())
-                {
-                    if(message.page > 0)
-                    {
+                if (blockEntity != null && blockEntity instanceof BlockEntityMultiCrafter blockEntityMultiCrafter && blockEntityMultiCrafter.getMultiBlock().isAssembled()) {
+                    if (message.page > 0) {
                         blockEntityMultiCrafter.getMultiBlock().currentPage = message.page;
                         blockEntityMultiCrafter.setChanged();
                     }
@@ -58,8 +50,7 @@ public class PacketGui
             ctx.get().setPacketHandled(true);
         }
 
-        public static void openGUI(Level world, Player player, BlockPos blockPos)
-        {
+        public static void openGUI(Level world, Player player, BlockPos blockPos) {
             NetworkHooks.openGui((ServerPlayer) player, (MenuProvider) world.getBlockEntity(blockPos), blockPos);
         }
     }

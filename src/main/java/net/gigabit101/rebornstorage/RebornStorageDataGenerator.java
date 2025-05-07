@@ -43,21 +43,17 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 @Mod.EventBusSubscriber(modid = Constants.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
-public class RebornStorageDataGenerator
-{
+public class RebornStorageDataGenerator {
     @SubscribeEvent
-    public static void gatherData(GatherDataEvent event)
-    {
+    public static void gatherData(GatherDataEvent event) {
         DataGenerator generator = event.getGenerator();
 
-        if (event.includeServer())
-        {
+        if (event.includeServer()) {
             generator.addProvider(new GeneratorRecipes(generator));
             generator.addProvider(new GeneratorLoots(generator));
         }
 
-        if (event.includeClient())
-        {
+        if (event.includeClient()) {
             generator.addProvider(new GeneratorBlockTags(generator, event.getExistingFileHelper()));
             generator.addProvider(new GeneratorLanguage(generator));
             generator.addProvider(new GeneratorBlockStates(generator, event.getExistingFileHelper()));
@@ -65,20 +61,16 @@ public class RebornStorageDataGenerator
         }
     }
 
-    static class GeneratorBlockStates extends BlockStateProvider
-    {
-        public GeneratorBlockStates(DataGenerator gen, ExistingFileHelper exFileHelper)
-        {
+    static class GeneratorBlockStates extends BlockStateProvider {
+        public GeneratorBlockStates(DataGenerator gen, ExistingFileHelper exFileHelper) {
             super(gen, Constants.MOD_ID, exFileHelper);
         }
 
         @Override
-        protected void registerStatesAndModels()
-        {
+        protected void registerStatesAndModels() {
         }
 
-        public void registerSidedBlock(Block block, String folder)
-        {
+        public void registerSidedBlock(Block block, String folder) {
             horizontalBlock(block, models().orientableWithBottom(getResourceLocation(block).getPath(),
                     modLoc("block/" + folder + "/side"),
                     modLoc("block/" + folder + "/front"),
@@ -86,22 +78,18 @@ public class RebornStorageDataGenerator
                     modLoc("block/" + folder + "/top")));
         }
 
-        public ResourceLocation getResourceLocation(Block block)
-        {
+        public ResourceLocation getResourceLocation(Block block) {
             return Registry.BLOCK.getKey(block);
         }
     }
 
-    static class GeneratorItemModels extends ItemModelProvider
-    {
-        public GeneratorItemModels(DataGenerator generator, ExistingFileHelper existingFileHelper)
-        {
+    static class GeneratorItemModels extends ItemModelProvider {
+        public GeneratorItemModels(DataGenerator generator, ExistingFileHelper existingFileHelper) {
             super(generator, Constants.MOD_ID, existingFileHelper);
         }
 
         @Override
-        protected void registerModels()
-        {
+        protected void registerModels() {
 //            ModBlocks.CHARGERS.forEach((chargerTypes, blockSupplier) -> registerDefaultItemBlockModel(blockSupplier.get()));
 //            ModBlocks.POWER_CELLS.forEach((chargerTypes, blockSupplier) -> registerDefaultItemBlockModel(blockSupplier.get()));
 //
@@ -115,39 +103,32 @@ public class RebornStorageDataGenerator
 //                    mcLoc("item/generated"), "layer0", modLoc("item/drill_handle")));
         }
 
-        public void registerDefaultItemBlockModel(Block block)
-        {
+        public void registerDefaultItemBlockModel(Block block) {
             String path = getResourceLocation(block).getPath();
             getBuilder(path).parent(new ModelFile.UncheckedModelFile(modLoc("block/" + path)));
         }
 
-        public ResourceLocation getResourceLocation(Item item)
-        {
+        public ResourceLocation getResourceLocation(Item item) {
             return Registry.ITEM.getKey(item);
         }
 
-        public ResourceLocation getResourceLocation(Block block)
-        {
+        public ResourceLocation getResourceLocation(Block block) {
             return Registry.BLOCK.getKey(block);
         }
 
         @Override
-        public @NotNull String getName()
-        {
+        public @NotNull String getName() {
             return "Item Models";
         }
     }
 
-    static class GeneratorLanguage extends LanguageProvider
-    {
-        public GeneratorLanguage(DataGenerator gen)
-        {
+    static class GeneratorLanguage extends LanguageProvider {
+        public GeneratorLanguage(DataGenerator gen) {
             super(gen, Constants.MOD_ID, "en_us");
         }
 
         @Override
-        protected void addTranslations()
-        {
+        protected void addTranslations() {
 //            addBlock(ModBlocks.CHARGERS.get(ChargerTypes.BASIC), "Basic Charger");
 //            addBlock(ModBlocks.CHARGERS.get(ChargerTypes.ADVANCED), "Advanced Charger");
 //            addBlock(ModBlocks.CHARGERS.get(ChargerTypes.ULTIMATE), "Ultimate Charger");
@@ -192,29 +173,23 @@ public class RebornStorageDataGenerator
     }
 
 
-    static class GeneratorLoots extends LootTableProvider
-    {
-        public GeneratorLoots(DataGenerator dataGeneratorIn)
-        {
+    static class GeneratorLoots extends LootTableProvider {
+        public GeneratorLoots(DataGenerator dataGeneratorIn) {
             super(dataGeneratorIn);
         }
 
         @Override
-        protected @NotNull List<Pair<Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>, LootContextParamSet>> getTables()
-        {
+        protected @NotNull List<Pair<Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>, LootContextParamSet>> getTables() {
             return ImmutableList.of(Pair.of(Blocks::new, LootContextParamSets.BLOCK));
         }
 
-        private static class Blocks extends BlockLoot
-        {
+        private static class Blocks extends BlockLoot {
             @Override
-            protected void addTables()
-            {
+            protected void addTables() {
                 ModBlocks.BLOCKS.getEntries().forEach(blockRegistryObject -> this.add(blockRegistryObject.get(), LootTable.lootTable().withPool(create(blockRegistryObject.get()))));
             }
 
-            public LootPool.Builder create(Block block)
-            {
+            public LootPool.Builder create(Block block) {
                 return LootPool.lootPool().name(getResourceLocation(block).toString())
                         .setRolls(ConstantValue.exactly(1)).when(ExplosionCondition.survivesExplosion())
                         .add(LootItem.lootTableItem(block)
@@ -222,14 +197,12 @@ public class RebornStorageDataGenerator
 
             }
 
-            public ResourceLocation getResourceLocation(Block block)
-            {
+            public ResourceLocation getResourceLocation(Block block) {
                 return Registry.BLOCK.getKey(block);
             }
 
             @Override
-            protected @NotNull Iterable<Block> getKnownBlocks()
-            {
+            protected @NotNull Iterable<Block> getKnownBlocks() {
                 return ImmutableList.of(
                         ModBlocks.BLOCK_MULTI_FRAME.get(),
                         ModBlocks.BLOCK_MULTI_HEAT.get(),
@@ -241,22 +214,18 @@ public class RebornStorageDataGenerator
         }
 
         @Override
-        protected void validate(Map<ResourceLocation, LootTable> map, @NotNull ValidationContext validationtracker)
-        {
+        protected void validate(Map<ResourceLocation, LootTable> map, @NotNull ValidationContext validationtracker) {
             map.forEach((name, table) -> LootTables.validate(validationtracker, name, table));
         }
     }
 
-    static class GeneratorRecipes extends RecipeProvider
-    {
-        public GeneratorRecipes(DataGenerator generator)
-        {
+    static class GeneratorRecipes extends RecipeProvider {
+        public GeneratorRecipes(DataGenerator generator) {
             super(generator);
         }
 
         @Override
-        protected void buildCraftingRecipes(@NotNull Consumer<FinishedRecipe> consumer)
-        {
+        protected void buildCraftingRecipes(@NotNull Consumer<FinishedRecipe> consumer) {
 //            Block block = ModBlocks.CHARGERS.get(ChargerTypes.BASIC).get();
 //            ShapedRecipeBuilder.shaped(block)
 //                    .define('i', Tags.Items.INGOTS_IRON)
@@ -270,16 +239,13 @@ public class RebornStorageDataGenerator
         }
     }
 
-    static class GeneratorBlockTags extends BlockTagsProvider
-    {
-        public GeneratorBlockTags(DataGenerator generator, @Nullable ExistingFileHelper existingFileHelper)
-        {
+    static class GeneratorBlockTags extends BlockTagsProvider {
+        public GeneratorBlockTags(DataGenerator generator, @Nullable ExistingFileHelper existingFileHelper) {
             super(generator, Constants.MOD_ID, existingFileHelper);
         }
 
         @Override
-        protected void addTags()
-        {
+        protected void addTags() {
             ModBlocks.BLOCKS.getEntries().forEach(blockRegistryObject -> addMineable(blockRegistryObject.get()));
 
             RSBlocks.COLORED_BLOCKS.forEach(registryObject -> addMineable(registryObject.get()));
@@ -302,8 +268,7 @@ public class RebornStorageDataGenerator
             );
         }
 
-        public void addMineable(Block block)
-        {
+        public void addMineable(Block block) {
             tag(BlockTags.MINEABLE_WITH_PICKAXE).add(block);
         }
     }

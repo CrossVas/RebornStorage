@@ -9,13 +9,10 @@ import net.minecraftforge.items.SlotItemHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class AdvancedWirelessTransmitterContainer extends BaseContainerMenu
-{
-    public AdvancedWirelessTransmitterContainer(@Nullable BlockEntityAdvancedWirelessTransmitter wirelessTransmitter, Player player, int windowId)
-    {
+public class AdvancedWirelessTransmitterContainer extends BaseContainerMenu {
+    public AdvancedWirelessTransmitterContainer(@Nullable BlockEntityAdvancedWirelessTransmitter wirelessTransmitter, Player player, int windowId) {
         super(ModContainers.ADVANCED_WIRELESS_CONTAINER.get(), wirelessTransmitter, player, windowId);
-        for (int i = 0; i < 4; ++i)
-        {
+        for (int i = 0; i < 4; ++i) {
             addSlot(new SlotItemHandler(wirelessTransmitter.getNode().getUpgrades(), i, 187, 6 + (i * 18)));
         }
 
@@ -26,14 +23,12 @@ public class AdvancedWirelessTransmitterContainer extends BaseContainerMenu
 
     @Nullable
     @Override
-    public BlockEntityAdvancedWirelessTransmitter getBlockEntity()
-    {
+    public BlockEntityAdvancedWirelessTransmitter getBlockEntity() {
         return (BlockEntityAdvancedWirelessTransmitter) super.getBlockEntity();
     }
 
     @Override
-    public boolean stillValid(@NotNull Player player)
-    {
+    public boolean stillValid(@NotNull Player player) {
         return true;
     }
 }

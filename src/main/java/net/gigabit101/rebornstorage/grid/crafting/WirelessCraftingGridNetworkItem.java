@@ -16,16 +16,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 
-public class WirelessCraftingGridNetworkItem implements INetworkItem
-{
+public class WirelessCraftingGridNetworkItem implements INetworkItem {
     private final INetworkItemManager handler;
     private final Player player;
     private final ItemStack stack;
     private final PlayerSlot slot;
 
 
-    public WirelessCraftingGridNetworkItem(INetworkItemManager handler, Player player, ItemStack stack, PlayerSlot slot)
-    {
+    public WirelessCraftingGridNetworkItem(INetworkItemManager handler, Player player, ItemStack stack, PlayerSlot slot) {
         this.handler = handler;
         this.player = player;
         this.stack = stack;
@@ -33,25 +31,21 @@ public class WirelessCraftingGridNetworkItem implements INetworkItem
     }
 
     @Override
-    public Player getPlayer()
-    {
+    public Player getPlayer() {
         return player;
     }
 
     @Override
-    public boolean onOpen(INetwork network)
-    {
+    public boolean onOpen(INetwork network) {
         IEnergyStorage energy = stack.getCapability(CapabilityEnergy.ENERGY, null).orElse(null);
 
         if (((ItemWirelessGrid) stack.getItem()).getType() != ItemWirelessGrid.Type.CREATIVE &&
-                energy != null && energy.getEnergyStored() <= RS.SERVER_CONFIG.getWirelessFluidGrid().getOpenUsage())
-        {
+                energy != null && energy.getEnergyStored() <= RS.SERVER_CONFIG.getWirelessFluidGrid().getOpenUsage()) {
             sendOutOfEnergyMessage();
             return false;
         }
 
-        if (!network.getSecurityManager().hasPermission(Permission.MODIFY, player))
-        {
+        if (!network.getSecurityManager().hasPermission(Permission.MODIFY, player)) {
             LevelUtils.sendNoPermissionMessage(player);
 
             return false;
@@ -68,9 +62,8 @@ public class WirelessCraftingGridNetworkItem implements INetworkItem
     }
 
     @Override
-    public void drainEnergy(int energy)
-    {
-        if (RS.SERVER_CONFIG.getWirelessGrid().getUseEnergy() && ((ItemWirelessGrid)this.stack.getItem()).getType() != ItemWirelessGrid.Type.CREATIVE) {
+    public void drainEnergy(int energy) {
+        if (RS.SERVER_CONFIG.getWirelessGrid().getUseEnergy() && ((ItemWirelessGrid) this.stack.getItem()).getType() != ItemWirelessGrid.Type.CREATIVE) {
             this.stack.getCapability(CapabilityEnergy.ENERGY).ifPresent((energyStorage) -> {
                 energyStorage.extractEnergy(energy, false);
                 if (energyStorage.getEnergyStored() <= 0) {

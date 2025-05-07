@@ -58,15 +58,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class BlockMultiCrafter extends BaseEntityBlock
-{
+public class BlockMultiCrafter extends BaseEntityBlock {
 // TODO Disabled by Rid
 
 //    public static final BooleanProperty UP_DOWN_CONNECTION = BooleanProperty.create("up_down");
 //    public static final BooleanProperty LEFT_RIGHT_CONNECTION = BooleanProperty.create("left_right");
 
-    public BlockMultiCrafter()
-    {
+    public BlockMultiCrafter() {
         super(Properties.of(Material.METAL).strength(2.0F));
 // TODO Disabled by Rid
 
@@ -74,15 +72,13 @@ public class BlockMultiCrafter extends BaseEntityBlock
     }
 
     @Override
-    public @NotNull RenderShape getRenderShape(BlockState state)
-    {
+    public @NotNull RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
     }
 
     @Nullable
     @Override
-    public BlockState getStateForPlacement(@NotNull BlockPlaceContext blockPlaceContext)
-    {
+    public BlockState getStateForPlacement(@NotNull BlockPlaceContext blockPlaceContext) {
         Level level = blockPlaceContext.getLevel();
         BlockPos pos = blockPlaceContext.getClickedPos();
 
@@ -101,12 +97,12 @@ public class BlockMultiCrafter extends BaseEntityBlock
 //            return super.getStateForPlacement(blockPlaceContext).setValue(LEFT_RIGHT_CONNECTION, true);
 //        }
 
-            //TODO
+        //TODO
         return defaultBlockState();
     }
 
 // TODO Disabled by Rid
-    
+
 //    @Override
 //    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
 //    {
@@ -115,87 +111,69 @@ public class BlockMultiCrafter extends BaseEntityBlock
 
     @org.jetbrains.annotations.Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState)
-    {
+    public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
         return new BlockEntityMultiCrafter(blockPos, blockState);
     }
 
     @Override
-    public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand hand, BlockHitResult blockHitResult)
-    {
+    public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand hand, BlockHitResult blockHitResult) {
         if (level.getBlockEntity(blockPos) == null) return InteractionResult.FAIL;
         BlockEntityMultiCrafter tile = (BlockEntityMultiCrafter) level.getBlockEntity(blockPos);
-        if(tile == null) return InteractionResult.FAIL;
+        if (tile == null) return InteractionResult.FAIL;
 
 //        System.out.println("isAssembled " + tile.getMultiBlock().isAssembled() + (level.isClientSide ? " Client" : " Sever"));
 //        tile.load(tile.getUpdateTag());
 
-        if (tile.getMultiblockController() != null)
-        {
-            if (!tile.getMultiblockController().isAssembled())
-            {
-                if (tile.getMultiblockController().getLastValidationException() != null)
-                {
-                    if (player.getItemInHand(hand).isEmpty())
-                    {
-                        if(level.isClientSide)
-                        {
+        if (tile.getMultiblockController() != null) {
+            if (!tile.getMultiblockController().isAssembled()) {
+                if (tile.getMultiblockController().getLastValidationException() != null) {
+                    if (player.getItemInHand(hand).isEmpty()) {
+                        if (level.isClientSide) {
                             player.sendMessage(new TextComponent(tile.getMultiblockController().getLastValidationException().getMessage()), Util.NIL_UUID);
                         }
 
                         return InteractionResult.SUCCESS;
                     }
                 }
-            } else
-            {
-                if(level.isClientSide)
+            } else {
+                if (level.isClientSide)
                     PacketHandler.sendToServer(new PacketGui(0, blockPos));
                 return InteractionResult.SUCCESS;
             }
             return InteractionResult.SUCCESS;
-        } else
-        {
+        } else {
             return super.use(blockState, level, blockPos, player, hand, blockHitResult);
         }
     }
 
     @Override
-    public void setPlacedBy(@NotNull Level level, @NotNull BlockPos blockPos, @NotNull BlockState blockState, @org.jetbrains.annotations.Nullable LivingEntity livingEntity, @NotNull ItemStack itemStack)
-    {
+    public void setPlacedBy(@NotNull Level level, @NotNull BlockPos blockPos, @NotNull BlockState blockState, @org.jetbrains.annotations.Nullable LivingEntity livingEntity, @NotNull ItemStack itemStack) {
         super.setPlacedBy(level, blockPos, blockState, livingEntity, itemStack);
-        if (!level.isClientSide)
-        {
+        if (!level.isClientSide) {
             API.instance().getNetworkNodeManager((ServerLevel) level).getNode(blockPos);
         }
     }
 
     @Override
-    public void onRemove(@NotNull BlockState blockState, Level level, @NotNull BlockPos blockPos, @NotNull BlockState blockState2, boolean p_60519_)
-    {
+    public void onRemove(@NotNull BlockState blockState, Level level, @NotNull BlockPos blockPos, @NotNull BlockState blockState2, boolean p_60519_) {
         BlockEntity blockEntity = level.getBlockEntity(blockPos);
-        if (blockEntity != null && blockEntity instanceof BlockEntityMultiCrafter blockEntityMultiCrafter)
-        {
-            if (blockEntityMultiCrafter.getNode().patterns != null)
-            {
-                for (int i = 0; i < blockEntityMultiCrafter.getNode().patterns.getSlots(); i++)
-                {
+        if (blockEntity != null && blockEntity instanceof BlockEntityMultiCrafter blockEntityMultiCrafter) {
+            if (blockEntityMultiCrafter.getNode().patterns != null) {
+                for (int i = 0; i < blockEntityMultiCrafter.getNode().patterns.getSlots(); i++) {
                     ItemStack stack = blockEntityMultiCrafter.getNode().patterns.getStackInSlot(i);
-                    if (!stack.isEmpty())
-                    {
+                    if (!stack.isEmpty()) {
                         Containers.dropItemStack(level, blockPos.getX(), blockPos.getY(), blockPos.getZ(), stack);
                     }
                 }
             }
-            if (blockEntityMultiCrafter.getMultiBlock() != null)
-            {
+            if (blockEntityMultiCrafter.getMultiBlock() != null) {
                 blockEntityMultiCrafter.getMultiBlock().detachBlock(blockEntityMultiCrafter, false);
             }
         }
 
         INetworkNodeManager manager = API.instance().getNetworkNodeManager((ServerLevel) level);
         INetworkNode node = manager.getNode(blockPos);
-        if (node != null && node.getNetwork() != null)
-        {
+        if (node != null && node.getNetwork() != null) {
             node.getNetwork().getCraftingManager().invalidate();
             node.getNetwork().markDirty();
             node.getNetwork().getNodeGraph().invalidate(Action.PERFORM, level, blockPos);

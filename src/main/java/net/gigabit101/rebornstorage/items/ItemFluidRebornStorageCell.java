@@ -21,55 +21,45 @@ import net.minecraft.world.level.Level;
 import java.util.List;
 import java.util.UUID;
 
-public class ItemFluidRebornStorageCell extends Item implements IStorageDiskProvider
-{
+public class ItemFluidRebornStorageCell extends Item implements IStorageDiskProvider {
     private static final String NBT_ID = "Id";
 
     private final int capacity;
 
-    public ItemFluidRebornStorageCell(int capacity, StorageType storageType)
-    {
+    public ItemFluidRebornStorageCell(int capacity, StorageType storageType) {
         super(new Properties().tab(CreativeTabRebornStorage.INSTANCE).stacksTo(1));
         this.capacity = capacity;
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, Level world, Entity entity, int itemSlot, boolean isSelected)
-    {
+    public void inventoryTick(ItemStack stack, Level world, Entity entity, int itemSlot, boolean isSelected) {
         super.inventoryTick(stack, world, entity, itemSlot, isSelected);
-        if (!world.isClientSide && !stack.hasTag() && entity instanceof Player)
-        {
+        if (!world.isClientSide && !stack.hasTag() && entity instanceof Player) {
             UUID id = UUID.randomUUID();
-            API.instance().getStorageDiskManager((ServerLevel)world).set(id, API.instance().createDefaultFluidDisk((ServerLevel)world, this.getCapacity(stack), (Player)entity));
-            API.instance().getStorageDiskManager((ServerLevel)world).markForSaving();
+            API.instance().getStorageDiskManager((ServerLevel) world).set(id, API.instance().createDefaultFluidDisk((ServerLevel) world, this.getCapacity(stack), (Player) entity));
+            API.instance().getStorageDiskManager((ServerLevel) world).markForSaving();
             this.setId(stack, id);
         }
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @org.jetbrains.annotations.Nullable Level level, List<net.minecraft.network.chat.Component> tooltip, TooltipFlag flag)
-    {
+    public void appendHoverText(ItemStack stack, @org.jetbrains.annotations.Nullable Level level, List<net.minecraft.network.chat.Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, level, tooltip, flag);
-        if (isValid(stack))
-        {
+        if (isValid(stack)) {
             UUID id = getId(stack);
 
             API.instance().getStorageDiskSync().sendRequest(id);
 
             StorageDiskSyncData data = API.instance().getStorageDiskSync().getData(id);
 
-            if (data != null)
-            {
-                if (data.getCapacity() == -1)
-                {
+            if (data != null) {
+                if (data.getCapacity() == -1) {
                     tooltip.add(new TranslatableComponent("misc.refinedstorage.storage.stored", API.instance().getQuantityFormatter().format(data.getStored())).setStyle(Styles.GRAY));
-                } else
-                {
+                } else {
                     tooltip.add(new TranslatableComponent("misc.refinedstorage.storage.stored_capacity", API.instance().getQuantityFormatter().format(data.getStored()), API.instance().getQuantityFormatter().format(data.getCapacity())).setStyle(Styles.GRAY));
                 }
             }
-            if (flag.isAdvanced())
-            {
+            if (flag.isAdvanced()) {
                 tooltip.add(new TextComponent(id.toString()));
             }
         }
@@ -77,39 +67,33 @@ public class ItemFluidRebornStorageCell extends Item implements IStorageDiskProv
 
 
     @Override
-    public int getEntityLifespan(ItemStack stack, Level world)
-    {
+    public int getEntityLifespan(ItemStack stack, Level world) {
         return 2147483647;
     }
 
     @Override
-    public UUID getId(ItemStack disk)
-    {
+    public UUID getId(ItemStack disk) {
         return disk.getTag().getUUID(NBT_ID);
     }
 
     @Override
-    public void setId(ItemStack disk, UUID id)
-    {
+    public void setId(ItemStack disk, UUID id) {
         disk.setTag(new CompoundTag());
         disk.getTag().putUUID(NBT_ID, id);
     }
 
     @Override
-    public boolean isValid(ItemStack disk)
-    {
+    public boolean isValid(ItemStack disk) {
         return disk.hasTag() && disk.getTag().hasUUID(NBT_ID);
     }
 
     @Override
-    public int getCapacity(ItemStack disk)
-    {
+    public int getCapacity(ItemStack disk) {
         return this.capacity;
     }
 
     @Override
-    public StorageType getType()
-    {
+    public StorageType getType() {
         return StorageType.FLUID;
     }
 }

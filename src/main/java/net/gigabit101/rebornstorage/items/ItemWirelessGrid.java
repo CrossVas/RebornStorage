@@ -23,31 +23,25 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class ItemWirelessGrid extends NetworkItem
-{
-    public enum Type
-    {
+public class ItemWirelessGrid extends NetworkItem {
+    public enum Type {
         NORMAL,
         CREATIVE;
     }
 
     Type type;
 
-    public ItemWirelessGrid(Properties item, Type type, Supplier<Integer> energyCapacity)
-    {
+    public ItemWirelessGrid(Properties item, Type type, Supplier<Integer> energyCapacity) {
         super(item, type == Type.CREATIVE, energyCapacity);
         this.type = type;
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand)
-    {
-        if(player.isCrouching())
-        {
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        if (player.isCrouching()) {
             ItemStack stack = player.getItemInHand(hand);
             MODE current = getMode(stack);
-            switch (current)
-            {
+            switch (current) {
                 case CRAFTING:
                     setMode(stack, MODE.FLUID);
                     player.displayClientMessage(new TextComponent(ChatFormatting.GOLD + "MODE: " + MODE.FLUID.name()), true);
@@ -65,22 +59,18 @@ public class ItemWirelessGrid extends NetworkItem
         return super.use(level, player, hand);
     }
 
-    public Type getType()
-    {
+    public Type getType() {
         return type;
     }
 
-    public void setMode(ItemStack stack, MODE mode)
-    {
+    public void setMode(ItemStack stack, MODE mode) {
         CompoundTag tag = stack.getOrCreateTag();
         tag.putString("mode", mode.name());
     }
 
-    public MODE getMode(ItemStack stack)
-    {
+    public MODE getMode(ItemStack stack) {
         CompoundTag compoundTag = stack.getOrCreateTag();
-        if(compoundTag.contains("mode"))
-        {
+        if (compoundTag.contains("mode")) {
             return MODE.valueOf(compoundTag.getString("mode"));
         }
         return MODE.CRAFTING;
@@ -88,10 +78,8 @@ public class ItemWirelessGrid extends NetworkItem
 
     @NotNull
     @Override
-    public INetworkItem provide(INetworkItemManager iNetworkItemManager, Player player, ItemStack itemStack, PlayerSlot playerSlot)
-    {
-        switch (getMode(itemStack))
-        {
+    public INetworkItem provide(INetworkItemManager iNetworkItemManager, Player player, ItemStack itemStack, PlayerSlot playerSlot) {
+        switch (getMode(itemStack)) {
             case CRAFTING:
                 return new WirelessCraftingGridNetworkItem(iNetworkItemManager, player, itemStack, playerSlot);
             case FLUID:
@@ -104,21 +92,17 @@ public class ItemWirelessGrid extends NetworkItem
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag)
-    {
+    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, level, tooltip, flag);
-        try
-        {
+        try {
             tooltip.add(new TextComponent(ChatFormatting.GOLD + "MODE: " + getMode(stack)));
 
-        } catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public enum MODE
-    {
+    public enum MODE {
         CRAFTING,
         FLUID,
         MONITOR

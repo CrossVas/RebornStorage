@@ -18,82 +18,69 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.items.IItemHandler;
 import org.jetbrains.annotations.Nullable;
 
-public class AdvancedWirelessTransmitterNode extends NetworkNode implements IWirelessTransmitter
-{
+public class AdvancedWirelessTransmitterNode extends NetworkNode implements IWirelessTransmitter {
     public static final ResourceLocation ID = new ResourceLocation(Constants.MOD_ID, "advanced_wireless_transmitter");
     private final UpgradeItemHandler upgrades = (UpgradeItemHandler) new UpgradeItemHandler(4, UpgradeItem.Type.RANGE).addListener(new NetworkNodeInventoryListener(this));
 
-    public AdvancedWirelessTransmitterNode(Level level, BlockPos pos)
-    {
+    public AdvancedWirelessTransmitterNode(Level level, BlockPos pos) {
         super(level, pos);
     }
 
     @Override
-    public int getRange()
-    {
+    public int getRange() {
         return RebornStorageConfig.ADVANCED_WIRELESS_TRANSMITTER_RANGE.get() + this.upgrades.getUpgradeCount(UpgradeItem.Type.RANGE) * RebornStorageConfig.ADVANCED_WIRELESS_RAGE_BOOSTER_RANGE.get();
     }
 
     @Override
-    public BlockPos getOrigin()
-    {
+    public BlockPos getOrigin() {
         return this.pos;
     }
 
     @Override
-    public ResourceKey<Level> getDimension()
-    {
+    public ResourceKey<Level> getDimension() {
         return this.level.dimension();
     }
 
     @Override
-    public int getEnergyUsage()
-    {
+    public int getEnergyUsage() {
         return RebornStorageConfig.ADVANCED_WIRELESS_TRANSMITTER_POWER_COST.get();
     }
 
     @Override
-    public boolean canConduct(Direction direction)
-    {
+    public boolean canConduct(Direction direction) {
         return this.getDirection() == direction;
     }
 
     @Override
-    public void visit(Operator operator)
-    {
+    public void visit(Operator operator) {
         operator.apply(this.level, this.pos.relative(Direction.DOWN), Direction.UP);
     }
 
     @Override
-    public ResourceLocation getId()
-    {
+    public ResourceLocation getId() {
         return ID;
     }
 
     @Override
-    public void read(CompoundTag tag)
-    {
+    public void read(CompoundTag tag) {
         super.read(tag);
         StackUtils.readItems(upgrades, 0, tag);
     }
 
     @Override
-    public CompoundTag write(CompoundTag tag)
-    {
+    public CompoundTag write(CompoundTag tag) {
         super.write(tag);
         StackUtils.writeItems(upgrades, 0, tag);
         return tag;
     }
 
-    public UpgradeItemHandler getUpgrades()
-    {
+    public UpgradeItemHandler getUpgrades() {
         return upgrades;
     }
 
     @Nullable
     @Override
-    public IItemHandler getDrops()
-    {
+    public IItemHandler getDrops() {
         return getUpgrades();
     }
 }

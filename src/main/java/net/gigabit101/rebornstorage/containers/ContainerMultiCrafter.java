@@ -19,45 +19,35 @@ import net.minecraftforge.items.IItemHandler;
 
 import java.util.Objects;
 
-public class ContainerMultiCrafter extends ContainerBase
-{
+public class ContainerMultiCrafter extends ContainerBase {
     public MultiBlockCrafter crafter;
     public BlockPos blockPos;
 
-    public ContainerMultiCrafter(int id, Inventory playerInv, FriendlyByteBuf extraData)
-    {
+    public ContainerMultiCrafter(int id, Inventory playerInv, FriendlyByteBuf extraData) {
         this(id, playerInv, (BlockEntityMultiCrafter) Objects.requireNonNull(Minecraft.getInstance().level.getBlockEntity(extraData.readBlockPos())));
     }
 
-    public ContainerMultiCrafter(int id, Inventory playerInv, BlockEntityMultiCrafter multiBlockCrafter)
-    {
+    public ContainerMultiCrafter(int id, Inventory playerInv, BlockEntityMultiCrafter multiBlockCrafter) {
         super(ModContainers.MULTI_CRAFTER_CONTAINER.get(), id);
         Level level = playerInv.player.level;
         crafter = RebornStorage.getMultiBlock(level, multiBlockCrafter.getBlockPos());
-        if(level.isClientSide)
-        {
-            if(crafter == null)
-            {
+        if (level.isClientSide) {
+            if (crafter == null) {
                 RebornStorage.logger.error("multiblock is null on client");
                 return;
             }
-            if(crafter.invs.isEmpty())
-            {
+            if (crafter.invs.isEmpty()) {
                 RebornStorage.logger.error("invs.isEmpty");
                 return;
             }
         }
 
         this.blockPos = multiBlockCrafter.getBlockPos();
-        if (crafter != null && !crafter.invs.isEmpty())
-        {
-            if (crafter.currentPage > 0 && crafter.currentPage <= crafter.invs.size() && !crafter.invs.isEmpty() && crafter.invs.size() > 0)
-            {
+        if (crafter != null && !crafter.invs.isEmpty()) {
+            if (crafter.currentPage > 0 && crafter.currentPage <= crafter.invs.size() && !crafter.invs.isEmpty() && crafter.invs.size() > 0) {
                 drawSlotsForPage(crafter.getInvForPage(crafter.currentPage));
-            } else
-            {
-                if(!playerInv.player.level.isClientSide)
-                {
+            } else {
+                if (!playerInv.player.level.isClientSide) {
                     RebornStorage.logger.error("currentPage is out of bounds, Resetting to 1");
                     crafter.currentPage = 1;
                 }
@@ -67,15 +57,12 @@ public class ContainerMultiCrafter extends ContainerBase
         drawPlayersHotBar(playerInv, 45, 199);
     }
 
-    public void drawSlotsForPage(IItemHandler handler)
-    {
-        if(handler == null) return;
-        if(handler.getSlots() == 0) return;
+    public void drawSlotsForPage(IItemHandler handler) {
+        if (handler == null) return;
+        if (handler.getSlots() == 0) return;
         int i = 0;
-        for (int l = 0; l < 6; ++l)
-        {
-            for (int j1 = 0; j1 < 13; ++j1)
-            {
+        for (int l = 0; l < 6; ++l) {
+            for (int j1 = 0; j1 < 13; ++j1) {
                 this.addSlot(new SlotFiltered(handler, i, 9 + j1 * 18, 21 + l * 18));
                 i++;
             }
@@ -83,8 +70,7 @@ public class ContainerMultiCrafter extends ContainerBase
     }
 
     @Override
-    public boolean stillValid(Player player)
-    {
+    public boolean stillValid(Player player) {
         return true;
     }
 }

@@ -31,46 +31,37 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-public class WirelessCraftingGrid extends WirelessGrid
-{
+public class WirelessCraftingGrid extends WirelessGrid {
     @Nullable
     private final MinecraftServer server;
     private final Level level;
     private final Set<ICraftingGridListener> listeners = new HashSet<>();
     private boolean queuedSave;
 
-    private final AbstractContainerMenu craftingMenu = new AbstractContainerMenu(null, 0)
-    {
+    private final AbstractContainerMenu craftingMenu = new AbstractContainerMenu(null, 0) {
         @Override
-        public boolean stillValid(@NotNull Player player)
-        {
+        public boolean stillValid(@NotNull Player player) {
             return false;
         }
 
         @Override
-        public void slotsChanged(@NotNull Container container)
-        {
-            if (server != null)
-            {
+        public void slotsChanged(@NotNull Container container) {
+            if (server != null) {
                 onCraftingMatrixChanged();
             }
         }
     };
 
     private CraftingRecipe currentRecipe;
-    private final CraftingContainer craftingContainer = new CraftingContainer(craftingMenu, 3, 3)
-    {
+    private final CraftingContainer craftingContainer = new CraftingContainer(craftingMenu, 3, 3) {
         @Override
-        public void setChanged()
-        {
+        public void setChanged() {
             super.setChanged();
-            if (!queuedSave && server != null)
-            {
+            if (!queuedSave && server != null) {
                 queuedSave = true;
                 server.doRunTask(new TickTask(0, () ->
                 {
-                    if (!getStack().hasTag())
-                    {
+                    if (!getStack().hasTag()) {
                         getStack().setTag(new CompoundTag());
                     }
 
@@ -82,60 +73,49 @@ public class WirelessCraftingGrid extends WirelessGrid
     };
     private final ResultContainer craftingResultContainer = new ResultContainer();
 
-    public WirelessCraftingGrid(ItemStack stack, Level level, @Nullable MinecraftServer server, PlayerSlot slot)
-    {
+    public WirelessCraftingGrid(ItemStack stack, Level level, @Nullable MinecraftServer server, PlayerSlot slot) {
         super(stack, server, slot);
         this.server = server;
         this.level = level;
-        if (stack.hasTag())
-        {
+        if (stack.hasTag()) {
             StackUtils.readItems(craftingContainer, 1, stack.getTag());
         }
     }
 
     @Override
-    public Component getTitle()
-    {
+    public Component getTitle() {
         return new TranslatableComponent("gui.refinedstorage.crafting_grid");
     }
 
     @Override
-    public GridType getGridType()
-    {
+    public GridType getGridType() {
         return GridType.CRAFTING;
     }
 
     @Override
-    public CraftingContainer getCraftingMatrix()
-    {
+    public CraftingContainer getCraftingMatrix() {
         return craftingContainer;
     }
 
     @Override
-    public ResultContainer getCraftingResult()
-    {
+    public ResultContainer getCraftingResult() {
         return craftingResultContainer;
     }
 
     @Override
-    public void onCraftingMatrixChanged()
-    {
-        if (currentRecipe == null || !currentRecipe.matches(craftingContainer, level))
-        {
+    public void onCraftingMatrixChanged() {
+        if (currentRecipe == null || !currentRecipe.matches(craftingContainer, level)) {
             currentRecipe = level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftingContainer, level).orElse(null);
         }
-        if (currentRecipe == null)
-        {
+        if (currentRecipe == null) {
             craftingResultContainer.setItem(0, ItemStack.EMPTY);
-        } else
-        {
+        } else {
             craftingResultContainer.setItem(0, currentRecipe.assemble(craftingContainer));
         }
 
         listeners.forEach(ICraftingGridListener::onCraftingMatrixChanged);
 
-        if (!getStack().hasTag())
-        {
+        if (!getStack().hasTag()) {
             getStack().setTag(new CompoundTag());
         }
 
@@ -143,24 +123,19 @@ public class WirelessCraftingGrid extends WirelessGrid
     }
 
     @Override
-    public void onCrafted(Player player, @Nullable IStackList<ItemStack> availableItems, @Nullable IStackList<ItemStack> usedItems)
-    {
+    public void onCrafted(Player player, @Nullable IStackList<ItemStack> availableItems, @Nullable IStackList<ItemStack> usedItems) {
         RebornStorage.RSAPI.getCraftingGridBehavior().onCrafted(this, currentRecipe, player, availableItems, usedItems);
     }
 
     @Override
-    public void onClear(Player player)
-    {
+    public void onClear(Player player) {
         INetwork network = getNetwork();
 
-        if (network != null && network.getSecurityManager().hasPermission(Permission.INSERT, player))
-        {
-            for (int i = 0; i < craftingContainer.getContainerSize(); ++i)
-            {
+        if (network != null && network.getSecurityManager().hasPermission(Permission.INSERT, player)) {
+            for (int i = 0; i < craftingContainer.getContainerSize(); ++i) {
                 ItemStack slot = craftingContainer.getItem(i);
 
-                if (!slot.isEmpty())
-                {
+                if (!slot.isEmpty()) {
                     craftingContainer.setItem(i, network.insertItem(slot, slot.getCount(), Action.PERFORM));
 
                     network.getItemStorageTracker().changed(player, slot.copy());
@@ -170,26 +145,22 @@ public class WirelessCraftingGrid extends WirelessGrid
     }
 
     @Override
-    public void onCraftedShift(Player player)
-    {
+    public void onCraftedShift(Player player) {
         RebornStorage.RSAPI.getCraftingGridBehavior().onCraftedShift(this, player);
     }
 
     @Override
-    public void onRecipeTransfer(Player player, ItemStack[][] recipe)
-    {
+    public void onRecipeTransfer(Player player, ItemStack[][] recipe) {
         RebornStorage.RSAPI.getCraftingGridBehavior().onRecipeTransfer(this, player, recipe);
     }
 
     @Override
-    public void addCraftingListener(ICraftingGridListener listener)
-    {
+    public void addCraftingListener(ICraftingGridListener listener) {
         listeners.add(listener);
     }
 
     @Override
-    public void removeCraftingListener(ICraftingGridListener listener)
-    {
+    public void removeCraftingListener(ICraftingGridListener listener) {
         listeners.remove(listener);
     }
 }

@@ -12,20 +12,16 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import vazkii.patchouli.api.PatchouliAPI;
 
-public class ItemBook extends Item
-{
-    public ItemBook()
-    {
+public class ItemBook extends Item {
+    public ItemBook() {
         super(new Properties().tab(CreativeTabRebornStorage.INSTANCE).stacksTo(1));
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand)
-    {
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
 
-        if(player instanceof ServerPlayer serverPlayer)
-        {
+        if (player instanceof ServerPlayer serverPlayer) {
             PatchouliAPI.get().openBookGUI(serverPlayer, Registry.ITEM.getKey(this));
         }
         return InteractionResultHolder.success(stack);

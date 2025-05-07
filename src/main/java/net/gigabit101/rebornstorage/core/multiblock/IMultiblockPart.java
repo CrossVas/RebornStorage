@@ -17,12 +17,10 @@ import java.util.Set;
  * <p>
  * {@link }
  */
-public abstract class IMultiblockPart extends BlockEntity implements MenuProvider
-{
+public abstract class IMultiblockPart extends BlockEntity implements MenuProvider {
     public static final int INVALID_DISTANCE = Integer.MAX_VALUE;
 
-    public IMultiblockPart(BlockEntityType<?> tileEntityTypeIn, BlockPos blockPos, BlockState blockState)
-    {
+    public IMultiblockPart(BlockEntityType<?> tileEntityTypeIn, BlockPos blockPos, BlockState blockState) {
         super(tileEntityTypeIn, blockPos, blockState);
     }
 
@@ -235,8 +233,7 @@ public abstract class IMultiblockPart extends BlockEntity implements MenuProvide
 
 //	public abstract BlockState getBlockState();
 
-    public boolean isInvalid()
-    {
+    public boolean isInvalid() {
         return false;
     }
 }

@@ -15,34 +15,29 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 
 import javax.annotation.Nullable;
 
-public class WirelessCraftingGridGridFactory implements IGridFactory
-{
+public class WirelessCraftingGridGridFactory implements IGridFactory {
     public static final ResourceLocation ID = new ResourceLocation(Constants.MOD_ID, "wireless_crafting_grid");
 
     @Nullable
     @Override
-    public IGrid createFromStack(Player player, ItemStack stack, PlayerSlot slot)
-    {
+    public IGrid createFromStack(Player player, ItemStack stack, PlayerSlot slot) {
         return new WirelessCraftingGrid(stack, player.getLevel(), player.getServer(), slot);
     }
 
     @Nullable
     @Override
-    public IGrid createFromBlock(Player player, BlockPos pos)
-    {
+    public IGrid createFromBlock(Player player, BlockPos pos) {
         return null;
     }
 
     @Nullable
     @Override
-    public BlockEntity getRelevantBlockEntity(Level level, BlockPos pos)
-    {
+    public BlockEntity getRelevantBlockEntity(Level level, BlockPos pos) {
         return null;
     }
 
     @Override
-    public GridFactoryType getType()
-    {
+    public GridFactoryType getType() {
         return GridFactoryType.STACK;
     }
 

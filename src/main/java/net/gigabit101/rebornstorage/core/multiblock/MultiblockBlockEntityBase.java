@@ -18,16 +18,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public abstract class MultiblockBlockEntityBase extends IMultiblockPart
-{
+public abstract class MultiblockBlockEntityBase extends IMultiblockPart {
     private MultiblockControllerBase controller;
     private boolean visited;
 
     private boolean saveMultiblockData;
     private CompoundTag cachedMultiblockData;
 
-    public MultiblockBlockEntityBase(BlockEntityType<?> tileEntityTypeIn, BlockPos blockPos, BlockState blockState)
-    {
+    public MultiblockBlockEntityBase(BlockEntityType<?> tileEntityTypeIn, BlockPos blockPos, BlockState blockState) {
         super(tileEntityTypeIn, blockPos, blockState);
         controller = null;
         visited = false;
@@ -37,30 +35,24 @@ public abstract class MultiblockBlockEntityBase extends IMultiblockPart
 
     // /// Multiblock Connection Base Logic
     @Override
-    public Set<MultiblockControllerBase> attachToNeighbors()
-    {
+    public Set<MultiblockControllerBase> attachToNeighbors() {
         Set<MultiblockControllerBase> controllers = null;
         MultiblockControllerBase bestController = null;
 
         // Look for a compatible controller in our neighboring parts.
         IMultiblockPart[] partsToCheck = getNeighboringParts();
-        for (IMultiblockPart neighborPart : partsToCheck)
-        {
-            if (neighborPart.isConnected())
-            {
+        for (IMultiblockPart neighborPart : partsToCheck) {
+            if (neighborPart.isConnected()) {
                 MultiblockControllerBase candidate = neighborPart.getMultiblockController();
-                if (!candidate.getClass().equals(this.getMultiblockControllerType()))
-                {
+                if (!candidate.getClass().equals(this.getMultiblockControllerType())) {
                     // Skip multiblocks with incompatible types
                     continue;
                 }
 
-                if (controllers == null)
-                {
+                if (controllers == null) {
                     controllers = new HashSet<MultiblockControllerBase>();
                     bestController = candidate;
-                } else if (!controllers.contains(candidate) && candidate.shouldConsume(bestController))
-                {
+                } else if (!controllers.contains(candidate) && candidate.shouldConsume(bestController)) {
                     bestController = candidate;
                 }
 
@@ -69,8 +61,7 @@ public abstract class MultiblockBlockEntityBase extends IMultiblockPart
         }
 
         // If we've located a valid neighboring controller, attach to it.
-        if (bestController != null)
-        {
+        if (bestController != null) {
             // attachBlock will call onAttached, which will set the controller.
             this.controller = bestController;
             bestController.attachBlock(this);
@@ -80,35 +71,29 @@ public abstract class MultiblockBlockEntityBase extends IMultiblockPart
     }
 
     @Override
-    public void assertDetached()
-    {
-        if (this.controller != null)
-        {
+    public void assertDetached() {
+        if (this.controller != null) {
             RebornStorage.logger.info(String.format("[assert] Part @ (%d, %d, %d) should be detached already, but detected that it was not. This is not a fatal error, and will be repaired, but is unusual.", getBlockPos().getX(), getBlockPos().getY(), getBlockPos().getZ()));
             this.controller = null;
         }
     }
 
     @Override
-    public void load(CompoundTag compoundTag)
-    {
+    public void load(CompoundTag compoundTag) {
         super.load(compoundTag);
         // We can't directly initialize a multiblock controller yet, so we cache
         // the data here until
         // we receive a validate() call, which creates the controller and hands
         // off the cached data.
-        if (!compoundTag.getCompound("multiblockData").isEmpty())
-        {
+        if (!compoundTag.getCompound("multiblockData").isEmpty()) {
             this.cachedMultiblockData = compoundTag.getCompound("multiblockData");
         }
     }
 
     @Override
-    protected void saveAdditional(CompoundTag compoundTag)
-    {
+    protected void saveAdditional(CompoundTag compoundTag) {
         super.saveAdditional(compoundTag);
-        if (isMultiblockSaveDelegate() && isConnected())
-        {
+        if (isMultiblockSaveDelegate() && isConnected()) {
             CompoundTag multiblockData = new CompoundTag();
             this.controller.writeToNBT(multiblockData);
             compoundTag.put("multiblockData", multiblockData);
@@ -116,33 +101,29 @@ public abstract class MultiblockBlockEntityBase extends IMultiblockPart
     }
 
     @Override
-    public void onChunkUnloaded()
-    {
+    public void onChunkUnloaded() {
         super.onChunkUnloaded();
         detachSelf(true);
     }
 
     @Override
-    public void onLoad()
-    {
+    public void onLoad() {
         super.onLoad();
         MultiblockRegistry.onPartAdded(this.getLevel(), this);
     }
 
     @Nullable
     @Override
-    public Packet<ClientGamePacketListener> getUpdatePacket()
-    {
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
         CompoundTag compoundTag = new CompoundTag();
         encodeDescriptionPacket(compoundTag);
         return ClientboundBlockEntityDataPacket.create(this, blockEntity -> compoundTag);
     }
 
     @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt)
-    {
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
         super.onDataPacket(net, pkt);
-        if(pkt != null && pkt.getTag() != null)
+        if (pkt != null && pkt.getTag() != null)
             decodeDescriptionPacket(pkt.getTag());
     }
 
@@ -154,10 +135,8 @@ public abstract class MultiblockBlockEntityBase extends IMultiblockPart
      * @param packetData An NBT compound tag into which you should write your custom
      *                   description data.
      */
-    protected void encodeDescriptionPacket(CompoundTag packetData)
-    {
-        if (this.isMultiblockSaveDelegate() && isConnected())
-        {
+    protected void encodeDescriptionPacket(CompoundTag packetData) {
+        if (this.isMultiblockSaveDelegate() && isConnected()) {
             CompoundTag tag = new CompoundTag();
             getMultiblockController().formatDescriptionPacket(tag);
             packetData.put("multiblockData", tag);
@@ -170,16 +149,12 @@ public abstract class MultiblockBlockEntityBase extends IMultiblockPart
      *
      * @param packetData The NBT data from the tile entity's description packet.
      */
-    protected void decodeDescriptionPacket(CompoundTag packetData)
-    {
-        if (packetData.get("multiblockData") != null)
-        {
+    protected void decodeDescriptionPacket(CompoundTag packetData) {
+        if (packetData.get("multiblockData") != null) {
             CompoundTag tag = packetData.getCompound("multiblockData");
-            if (isConnected())
-            {
+            if (isConnected()) {
                 getMultiblockController().decodeDescriptionPacket(tag);
-            } else
-            {
+            } else {
                 // This part hasn't been added to a machine yet, so cache the data.
                 this.cachedMultiblockData = tag;
             }
@@ -187,20 +162,17 @@ public abstract class MultiblockBlockEntityBase extends IMultiblockPart
     }
 
     @Override
-    public boolean hasMultiblockSaveData()
-    {
+    public boolean hasMultiblockSaveData() {
         return this.cachedMultiblockData != null;
     }
 
     @Override
-    public CompoundTag getMultiblockSaveData()
-    {
+    public CompoundTag getMultiblockSaveData() {
         return this.cachedMultiblockData;
     }
 
     @Override
-    public void onMultiblockDataAssimilated()
-    {
+    public void onMultiblockDataAssimilated() {
         this.cachedMultiblockData = null;
     }
 
@@ -217,75 +189,63 @@ public abstract class MultiblockBlockEntityBase extends IMultiblockPart
     public abstract void onMachineDeactivated();
 
     @Override
-    public boolean isConnected()
-    {
+    public boolean isConnected() {
         return (controller != null);
     }
 
     @Override
-    public MultiblockControllerBase getMultiblockController()
-    {
+    public MultiblockControllerBase getMultiblockController() {
         return controller;
     }
 
     @Override
-    public BlockPos getWorldLocation()
-    {
+    public BlockPos getWorldLocation() {
         return this.getBlockPos();
     }
 
     @Override
-    public void becomeMultiblockSaveDelegate()
-    {
+    public void becomeMultiblockSaveDelegate() {
         this.saveMultiblockData = true;
     }
 
     @Override
-    public void forfeitMultiblockSaveDelegate()
-    {
+    public void forfeitMultiblockSaveDelegate() {
         this.saveMultiblockData = false;
     }
 
     @Override
-    public boolean isMultiblockSaveDelegate()
-    {
+    public boolean isMultiblockSaveDelegate() {
         return this.saveMultiblockData;
     }
 
     @Override
-    public void setUnvisited()
-    {
+    public void setUnvisited() {
         this.visited = false;
     }
 
     @Override
-    public void setVisited()
-    {
+    public void setVisited() {
         this.visited = true;
     }
 
     @Override
-    public boolean isVisited()
-    {
+    public boolean isVisited() {
         return this.visited;
     }
 
     @Override
-    public void onAssimilated(MultiblockControllerBase newController)
-    {
+    public void onAssimilated(MultiblockControllerBase newController) {
         assert (this.controller != newController);
         this.controller = newController;
     }
 
     @Override
-    public void onAttached(MultiblockControllerBase newController)
-    {
+    public void onAttached(MultiblockControllerBase newController) {
         this.controller = newController;
     }
 
     @Override
-    public void onDetached(MultiblockControllerBase oldController)
-    {
+    public void onDetached(MultiblockControllerBase oldController) {
         this.controller = null;
     }
 
@@ -293,14 +253,12 @@ public abstract class MultiblockBlockEntityBase extends IMultiblockPart
     public abstract MultiblockControllerBase createNewMultiblock();
 
     @Override
-    public IMultiblockPart[] getNeighboringParts()
-    {
+    public IMultiblockPart[] getNeighboringParts() {
         BlockEntity te;
         List<IMultiblockPart> neighborParts = new ArrayList<IMultiblockPart>();
         BlockPos neighborPosition, partPosition = this.getWorldLocation();
 
-        for (Direction facing : Direction.values())
-        {
+        for (Direction facing : Direction.values()) {
             neighborPosition = partPosition.relative(facing);
             te = this.level.getBlockEntity(neighborPosition);
 
@@ -311,8 +269,7 @@ public abstract class MultiblockBlockEntityBase extends IMultiblockPart
     }
 
     @Override
-    public void onOrphaned(MultiblockControllerBase controller, int oldSize, int newSize)
-    {
+    public void onOrphaned(MultiblockControllerBase controller, int oldSize, int newSize) {
         this.onLoad();
     }
 
@@ -320,10 +277,8 @@ public abstract class MultiblockBlockEntityBase extends IMultiblockPart
      * Detaches this block from its controller. Calls detachBlock() and clears
      * the controller member.
      */
-    protected void detachSelf(boolean chunkUnloading)
-    {
-        if (this.controller != null)
-        {
+    protected void detachSelf(boolean chunkUnloading) {
+        if (this.controller != null) {
             // Clean part out of controller
             this.controller.detachBlock(this, chunkUnloading);
 

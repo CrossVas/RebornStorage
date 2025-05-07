@@ -8,8 +8,7 @@ import net.minecraftforge.fml.common.Mod;
 import java.nio.file.Path;
 
 @Mod.EventBusSubscriber
-public class RebornStorageConfig
-{
+public class RebornStorageConfig {
     public static final String CATEGORY_GENERAL = "general";
     public static final String CATEGORY_MULTIBLOCK = "multiblock";
 
@@ -36,8 +35,7 @@ public class RebornStorageConfig
     public static ForgeConfigSpec.IntValue ADVANCED_WIRELESS_RAGE_BOOSTER_RANGE;
 
 
-    static
-    {
+    static {
         COMMON_BUILDER.comment("General Settings").push(CATEGORY_GENERAL);
 
         FRAME_COST = COMMON_BUILDER.comment("Power requirement for Frame blocks").defineInRange("multiblock_crafter_frame_cost", 0, 0, 1000);
@@ -66,8 +64,7 @@ public class RebornStorageConfig
         COMMON_CONFIG = COMMON_BUILDER.build();
     }
 
-    public static void loadConfig(ForgeConfigSpec spec, Path path)
-    {
+    public static void loadConfig(ForgeConfigSpec spec, Path path) {
 
         final CommentedFileConfig configData = CommentedFileConfig.builder(path).sync().autosave().writingMode(WritingMode.REPLACE).build();
 

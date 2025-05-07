@@ -7,11 +7,9 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber(modid = Constants.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
-public class RebornStorageClient
-{
+public class RebornStorageClient {
     @SubscribeEvent
-    public static void textureStitch(TextureStitchEvent.Pre event)
-    {
+    public static void textureStitch(TextureStitchEvent.Pre event) {
         event.addSprite(new ResourceLocation(Constants.MOD_ID, "items/grid"));
     }
 }
