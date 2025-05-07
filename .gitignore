@@ -1,18 +1,25 @@
+# eclipse
+bin
+*.launch
+.settings
+.metadata
 .classpath
 .project
-.settings
-*.iml
+
+# idea
+out
 *.ipr
 *.iws
-/.idea/
-/bin/
-/build/
-/.gradle/
-/assets/
-/libs/
-/run/
-/classes/
-out/
-dep/
-RebornStorage_Client.launch
-RebornStorage_Server.launch
+*.iml
+.idea
+
+# gradle
+build
+.gradle
+
+# other
+eclipse
+run
+
+# Files from Forge MDK
+forge*changelog.txt
