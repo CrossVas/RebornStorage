@@ -4,27 +4,15 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import com.refinedmods.refinedstorage.RSBlocks;
 import net.gigabit101.rebornstorage.init.ModBlocks;
-import net.minecraft.core.Registry;
-import net.minecraft.data.DataGenerator;
-import net.minecraft.data.loot.BlockLoot;
-import net.minecraft.data.loot.LootTableProvider;
-import net.minecraft.data.recipes.FinishedRecipe;
-import net.minecraft.data.recipes.RecipeProvider;
-import net.minecraft.data.tags.BlockTagsProvider;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.storage.loot.LootPool;
-import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.LootTables;
-import net.minecraft.world.level.storage.loot.ValidationContext;
-import net.minecraft.world.level.storage.loot.entries.LootItem;
-import net.minecraft.world.level.storage.loot.functions.CopyNameFunction;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
-import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
-import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
+import net.minecraft.block.Block;
+import net.minecraft.data.*;
+import net.minecraft.data.loot.BlockLootTables;
+import net.minecraft.item.Item;
+import net.minecraft.loot.*;
+import net.minecraft.loot.conditions.SurvivesExplosion;
+import net.minecraft.loot.functions.CopyName;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.Registry;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ItemModelProvider;
 import net.minecraftforge.client.model.generators.ModelFile;
@@ -32,9 +20,9 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.common.data.LanguageProvider;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
-import org.jetbrains.annotations.NotNull;
+import net.minecraftforge.fml.event.lifecycle.GatherDataEvent;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
@@ -117,7 +105,7 @@ public class RebornStorageDataGenerator {
         }
 
         @Override
-        public @NotNull String getName() {
+        public @Nonnull String getName() {
             return "Item Models";
         }
     }
@@ -179,11 +167,11 @@ public class RebornStorageDataGenerator {
         }
 
         @Override
-        protected @NotNull List<Pair<Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>, LootContextParamSet>> getTables() {
-            return ImmutableList.of(Pair.of(Blocks::new, LootContextParamSets.BLOCK));
+        protected @Nonnull List<Pair<Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>, LootParameterSet>> getTables() {
+            return ImmutableList.of(Pair.of(Blocks::new, LootParameterSets.BLOCK));
         }
 
-        private static class Blocks extends BlockLoot {
+        private static class Blocks extends BlockLootTables {
             @Override
             protected void addTables() {
                 ModBlocks.BLOCKS.getEntries().forEach(blockRegistryObject -> this.add(blockRegistryObject.get(), LootTable.lootTable().withPool(create(blockRegistryObject.get()))));
@@ -191,9 +179,9 @@ public class RebornStorageDataGenerator {
 
             public LootPool.Builder create(Block block) {
                 return LootPool.lootPool().name(getResourceLocation(block).toString())
-                        .setRolls(ConstantValue.exactly(1)).when(ExplosionCondition.survivesExplosion())
-                        .add(LootItem.lootTableItem(block)
-                                .apply(CopyNameFunction.copyName(CopyNameFunction.NameSource.BLOCK_ENTITY)));
+                        .setRolls(ConstantRange.exactly(1)).when(SurvivesExplosion.survivesExplosion())
+                        .add(ItemLootEntry.lootTableItem(block)
+                                .apply(CopyName.copyName(CopyName.Source.BLOCK_ENTITY)));
 
             }
 
@@ -202,7 +190,7 @@ public class RebornStorageDataGenerator {
             }
 
             @Override
-            protected @NotNull Iterable<Block> getKnownBlocks() {
+            protected @Nonnull Iterable<Block> getKnownBlocks() {
                 return ImmutableList.of(
                         ModBlocks.BLOCK_MULTI_FRAME.get(),
                         ModBlocks.BLOCK_MULTI_HEAT.get(),
@@ -214,8 +202,8 @@ public class RebornStorageDataGenerator {
         }
 
         @Override
-        protected void validate(Map<ResourceLocation, LootTable> map, @NotNull ValidationContext validationtracker) {
-            map.forEach((name, table) -> LootTables.validate(validationtracker, name, table));
+        protected void validate(Map<ResourceLocation, LootTable> map, @Nonnull ValidationTracker validationtracker) {
+            map.forEach((name, table) -> LootTableManager.validate(validationtracker, name, table));
         }
     }
 
@@ -224,19 +212,19 @@ public class RebornStorageDataGenerator {
             super(generator);
         }
 
-        @Override
-        protected void buildCraftingRecipes(@NotNull Consumer<FinishedRecipe> consumer) {
-//            Block block = ModBlocks.CHARGERS.get(ChargerTypes.BASIC).get();
-//            ShapedRecipeBuilder.shaped(block)
-//                    .define('i', Tags.Items.INGOTS_IRON)
-//                    .define('r', Tags.Items.DUSTS_REDSTONE)
-//                    .define('l', Tags.Items.STORAGE_BLOCKS_COAL)
-//                    .define('d', Tags.Items.GEMS_LAPIS)
-//                    .pattern("iri")
-//                    .pattern("drd")
-//                    .pattern("ili")
-//                    .unlockedBy("has_diamonds", has(Tags.Items.GEMS_DIAMOND)).save(consumer);
-        }
+//        @Override
+//        protected void buildCraftingRecipes(@Nonnull Consumer<IFinishedRecipe> consumer) {
+////            Block block = ModBlocks.CHARGERS.get(ChargerTypes.BASIC).get();
+////            ShapedRecipeBuilder.shaped(block)
+////                    .define('i', Tags.Items.INGOTS_IRON)
+////                    .define('r', Tags.Items.DUSTS_REDSTONE)
+////                    .define('l', Tags.Items.STORAGE_BLOCKS_COAL)
+////                    .define('d', Tags.Items.GEMS_LAPIS)
+////                    .pattern("iri")
+////                    .pattern("drd")
+////                    .pattern("ili")
+////                    .unlockedBy("has_diamonds", has(Tags.Items.GEMS_DIAMOND)).save(consumer);
+//        }
     }
 
     static class GeneratorBlockTags extends BlockTagsProvider {
@@ -252,24 +240,24 @@ public class RebornStorageDataGenerator {
             RSBlocks.STORAGE_BLOCKS.forEach((itemStorageType, storageBlockRegistryObject) -> addMineable(storageBlockRegistryObject.get()));
             RSBlocks.FLUID_STORAGE_BLOCKS.forEach((fluidStorageType, fluidStorageBlockRegistryObject) -> addMineable(fluidStorageBlockRegistryObject.get()));
 
-            tag(BlockTags.MINEABLE_WITH_PICKAXE).add(
-                    RSBlocks.IMPORTER.get(),
-                    RSBlocks.EXPORTER.get(),
-                    RSBlocks.EXTERNAL_STORAGE.get(),
-                    RSBlocks.DISK_DRIVE.get(),
-                    RSBlocks.INTERFACE.get(),
-                    RSBlocks.STORAGE_MONITOR.get(),
-                    RSBlocks.FLUID_INTERFACE.get(),
-                    RSBlocks.CONSTRUCTOR.get(),
-                    RSBlocks.DESTRUCTOR.get(),
-                    RSBlocks.PORTABLE_GRID.get(),
-                    RSBlocks.CREATIVE_PORTABLE_GRID.get(),
-                    RSBlocks.CABLE.get()
-            );
+//            tag(BlockTags.MINEABLE_WITH_PICKAXE).add(
+//                    RSBlocks.IMPORTER.get(),
+//                    RSBlocks.EXPORTER.get(),
+//                    RSBlocks.EXTERNAL_STORAGE.get(),
+//                    RSBlocks.DISK_DRIVE.get(),
+//                    RSBlocks.INTERFACE.get(),
+//                    RSBlocks.STORAGE_MONITOR.get(),
+//                    RSBlocks.FLUID_INTERFACE.get(),
+//                    RSBlocks.CONSTRUCTOR.get(),
+//                    RSBlocks.DESTRUCTOR.get(),
+//                    RSBlocks.PORTABLE_GRID.get(),
+//                    RSBlocks.CREATIVE_PORTABLE_GRID.get(),
+//                    RSBlocks.CABLE.get()
+//            );
         }
 
         public void addMineable(Block block) {
-            tag(BlockTags.MINEABLE_WITH_PICKAXE).add(block);
+//            tag(BlockTags.MINEABLE_WITH_PICKAXE).add(block);
         }
     }
 }

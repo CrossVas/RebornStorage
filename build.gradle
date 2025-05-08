@@ -115,6 +115,8 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     implementation fg.deobf("curse.maven:refined-storage-243076:3807951")
+    implementation fg.deobf("curse.maven:curios-309927:4419403")
+
     runtimeOnly fg.deobf("curse.maven:jei-238222:5846870")
 }
 

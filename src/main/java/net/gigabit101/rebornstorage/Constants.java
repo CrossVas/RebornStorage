@@ -1,6 +1,6 @@
 package net.gigabit101.rebornstorage;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ResourceLocation;
 
 public class Constants {
     public static final String MOD_ID = "rebornstorage";
