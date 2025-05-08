@@ -7,19 +7,19 @@ import com.refinedmods.refinedstorage.item.NetworkItem;
 import net.gigabit101.rebornstorage.grid.crafting.WirelessCraftingGridNetworkItem;
 import net.gigabit101.rebornstorage.grid.monitor.WirelessCraftingMonitorNetworkItemExt;
 import net.gigabit101.rebornstorage.grid.fluid.WirelessFluidGridNetworkItemExt;
-import net.minecraft.ChatFormatting;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.world.World;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -37,23 +37,23 @@ public class ItemWirelessGrid extends NetworkItem {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public ActionResult<ItemStack> use(World level, PlayerEntity player, Hand hand) {
         if (player.isCrouching()) {
             ItemStack stack = player.getItemInHand(hand);
             MODE current = getMode(stack);
             switch (current) {
                 case CRAFTING:
                     setMode(stack, MODE.FLUID);
-                    player.displayClientMessage(new TextComponent(ChatFormatting.GOLD + "MODE: " + MODE.FLUID.name()), true);
-                    return InteractionResultHolder.success(stack);
+                    player.displayClientMessage(new StringTextComponent("MODE: " + MODE.FLUID.name()).withStyle(TextFormatting.GOLD), true);
+                    return ActionResult.success(stack);
                 case FLUID:
                     setMode(stack, MODE.MONITOR);
-                    player.displayClientMessage(new TextComponent(ChatFormatting.GOLD + "MODE: " + MODE.MONITOR.name()), true);
-                    return InteractionResultHolder.success(stack);
+                    player.displayClientMessage(new StringTextComponent("MODE: " + MODE.MONITOR.name()).withStyle(TextFormatting.GOLD), true);
+                    return ActionResult.success(stack);
                 case MONITOR:
                     setMode(stack, MODE.CRAFTING);
-                    player.displayClientMessage(new TextComponent(ChatFormatting.GOLD + "MODE: " + MODE.CRAFTING.name()), true);
-                    return InteractionResultHolder.success(stack);
+                    player.displayClientMessage(new StringTextComponent("MODE: " + MODE.CRAFTING.name()).withStyle(TextFormatting.GOLD), true);
+                    return ActionResult.success(stack);
             }
         }
         return super.use(level, player, hand);
@@ -64,21 +64,21 @@ public class ItemWirelessGrid extends NetworkItem {
     }
 
     public void setMode(ItemStack stack, MODE mode) {
-        CompoundTag tag = stack.getOrCreateTag();
+        CompoundNBT tag = stack.getOrCreateTag();
         tag.putString("mode", mode.name());
     }
 
     public MODE getMode(ItemStack stack) {
-        CompoundTag compoundTag = stack.getOrCreateTag();
+        CompoundNBT compoundTag = stack.getOrCreateTag();
         if (compoundTag.contains("mode")) {
             return MODE.valueOf(compoundTag.getString("mode"));
         }
         return MODE.CRAFTING;
     }
 
-    @NotNull
+    @Nonnull
     @Override
-    public INetworkItem provide(INetworkItemManager iNetworkItemManager, Player player, ItemStack itemStack, PlayerSlot playerSlot) {
+    public INetworkItem provide(INetworkItemManager iNetworkItemManager, PlayerEntity player, ItemStack itemStack, PlayerSlot playerSlot) {
         switch (getMode(itemStack)) {
             case CRAFTING:
                 return new WirelessCraftingGridNetworkItem(iNetworkItemManager, player, itemStack, playerSlot);
@@ -92,10 +92,10 @@ public class ItemWirelessGrid extends NetworkItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, @Nullable World level, List<ITextComponent> tooltip, ITooltipFlag flag) {
         super.appendHoverText(stack, level, tooltip, flag);
         try {
-            tooltip.add(new TextComponent(ChatFormatting.GOLD + "MODE: " + getMode(stack)));
+            tooltip.add(new StringTextComponent("MODE: " + getMode(stack)).withStyle(TextFormatting.GOLD));
 
         } catch (Exception e) {
             e.printStackTrace();
