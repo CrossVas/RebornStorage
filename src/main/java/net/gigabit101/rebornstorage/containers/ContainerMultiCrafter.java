@@ -5,16 +5,12 @@ import net.gigabit101.rebornstorage.client.SlotFiltered;
 import net.gigabit101.rebornstorage.init.ModContainers;
 import net.gigabit101.rebornstorage.multiblocks.MultiBlockCrafter;
 import net.gigabit101.rebornstorage.blockentities.BlockEntityMultiCrafter;
-import net.gigabit101.rebornstorage.packet.PacketGui;
-import net.gigabit101.rebornstorage.packet.PacketHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.level.Level;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraftforge.items.IItemHandler;
 
 import java.util.Objects;
@@ -23,13 +19,13 @@ public class ContainerMultiCrafter extends ContainerBase {
     public MultiBlockCrafter crafter;
     public BlockPos blockPos;
 
-    public ContainerMultiCrafter(int id, Inventory playerInv, FriendlyByteBuf extraData) {
+    public ContainerMultiCrafter(int id, PlayerInventory playerInv, PacketBuffer extraData) {
         this(id, playerInv, (BlockEntityMultiCrafter) Objects.requireNonNull(Minecraft.getInstance().level.getBlockEntity(extraData.readBlockPos())));
     }
 
-    public ContainerMultiCrafter(int id, Inventory playerInv, BlockEntityMultiCrafter multiBlockCrafter) {
+    public ContainerMultiCrafter(int id, PlayerInventory playerInv, BlockEntityMultiCrafter multiBlockCrafter) {
         super(ModContainers.MULTI_CRAFTER_CONTAINER.get(), id);
-        Level level = playerInv.player.level;
+        World level = playerInv.player.level;
         crafter = RebornStorage.getMultiBlock(level, multiBlockCrafter.getBlockPos());
         if (level.isClientSide) {
             if (crafter == null) {
@@ -70,7 +66,7 @@ public class ContainerMultiCrafter extends ContainerBase {
     }
 
     @Override
-    public boolean stillValid(Player player) {
+    public boolean stillValid(PlayerEntity player) {
         return true;
     }
 }

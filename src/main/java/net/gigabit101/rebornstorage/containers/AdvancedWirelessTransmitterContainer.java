@@ -1,16 +1,16 @@
 package net.gigabit101.rebornstorage.containers;
 
-import com.refinedmods.refinedstorage.blockentity.BaseBlockEntity;
-import com.refinedmods.refinedstorage.container.BaseContainerMenu;
+import com.refinedmods.refinedstorage.container.BaseContainer;
 import net.gigabit101.rebornstorage.blockentities.BlockEntityAdvancedWirelessTransmitter;
 import net.gigabit101.rebornstorage.init.ModContainers;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.items.SlotItemHandler;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-public class AdvancedWirelessTransmitterContainer extends BaseContainerMenu {
-    public AdvancedWirelessTransmitterContainer(@Nullable BlockEntityAdvancedWirelessTransmitter wirelessTransmitter, Player player, int windowId) {
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+public class AdvancedWirelessTransmitterContainer extends BaseContainer {
+    public AdvancedWirelessTransmitterContainer(@Nullable BlockEntityAdvancedWirelessTransmitter wirelessTransmitter, PlayerEntity player, int windowId) {
         super(ModContainers.ADVANCED_WIRELESS_CONTAINER.get(), wirelessTransmitter, player, windowId);
         for (int i = 0; i < 4; ++i) {
             addSlot(new SlotItemHandler(wirelessTransmitter.getNode().getUpgrades(), i, 187, 6 + (i * 18)));
@@ -18,7 +18,7 @@ public class AdvancedWirelessTransmitterContainer extends BaseContainerMenu {
 
         addPlayerInventory(8, 55);
 
-        transferManager.addBiTransfer(player.getInventory(), wirelessTransmitter.getNode().getUpgrades());
+        transferManager.addBiTransfer(player.inventory, wirelessTransmitter.getNode().getUpgrades());
     }
 
     @Nullable
@@ -28,7 +28,7 @@ public class AdvancedWirelessTransmitterContainer extends BaseContainerMenu {
     }
 
     @Override
-    public boolean stillValid(@NotNull Player player) {
+    public boolean stillValid(@Nonnull PlayerEntity player) {
         return true;
     }
 }
