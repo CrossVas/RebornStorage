@@ -1,12 +1,12 @@
 package net.gigabit101.rebornstorage.packet;
 
 import net.gigabit101.rebornstorage.Constants;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.simple.SimpleChannel;
+import net.minecraftforge.fml.network.NetworkDirection;
+import net.minecraftforge.fml.network.NetworkRegistry;
+import net.minecraftforge.fml.network.simple.SimpleChannel;
 
 public class PacketHandler {
     private static final String PROTOCOL_VERSION = Integer.toString(1);
@@ -18,7 +18,7 @@ public class PacketHandler {
         HANDLER.registerMessage(disc++, PacketChangeMode.class, PacketChangeMode::encode, PacketChangeMode::decode, PacketChangeMode.Handler::handle);
     }
 
-    public static void sendTo(Object msg, ServerPlayer player) {
+    public static void sendTo(Object msg, ServerPlayerEntity player) {
         if (!(player instanceof FakePlayer)) {
             HANDLER.sendTo(msg, player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
         }

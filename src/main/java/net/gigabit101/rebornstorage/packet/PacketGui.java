@@ -1,15 +1,15 @@
 package net.gigabit101.rebornstorage.packet;
 
 import net.gigabit101.rebornstorage.blockentities.BlockEntityMultiCrafter;
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.MenuProvider;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.NetworkHooks;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.container.INamedContainerProvider;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraftforge.fml.network.NetworkHooks;
 
 import java.util.function.Supplier;
 
@@ -22,12 +22,12 @@ public class PacketGui {
         this.blockPos = blockPos;
     }
 
-    public static void encode(PacketGui packetGui, FriendlyByteBuf buf) {
+    public static void encode(PacketGui packetGui, PacketBuffer buf) {
         buf.writeInt(packetGui.page);
         buf.writeBlockPos(packetGui.blockPos);
     }
 
-    public static PacketGui decode(FriendlyByteBuf buf) {
+    public static PacketGui decode(PacketBuffer buf) {
         return new PacketGui(buf.readInt(), buf.readBlockPos());
     }
 
@@ -35,14 +35,14 @@ public class PacketGui {
         public static void handle(final PacketGui message, Supplier<NetworkEvent.Context> ctx) {
             ctx.get().enqueueWork(() ->
             {
-                ServerPlayer player = ctx.get().getSender();
+                ServerPlayerEntity player = ctx.get().getSender();
                 if (player == null) return;
 
-                BlockEntity blockEntity = player.getLevel().getBlockEntity(message.blockPos);
-                if (blockEntity != null && blockEntity instanceof BlockEntityMultiCrafter blockEntityMultiCrafter && blockEntityMultiCrafter.getMultiBlock().isAssembled()) {
+                TileEntity blockEntity = player.getLevel().getBlockEntity(message.blockPos);
+                if (blockEntity != null && blockEntity instanceof BlockEntityMultiCrafter && ((BlockEntityMultiCrafter) blockEntity).getMultiBlock().isAssembled()) {
                     if (message.page > 0) {
-                        blockEntityMultiCrafter.getMultiBlock().currentPage = message.page;
-                        blockEntityMultiCrafter.setChanged();
+                        ((BlockEntityMultiCrafter) blockEntity).getMultiBlock().currentPage = message.page;
+                        ((BlockEntityMultiCrafter) blockEntity).setChanged();
                     }
                 }
                 openGUI(player.getLevel(), player, message.blockPos);
@@ -50,8 +50,8 @@ public class PacketGui {
             ctx.get().setPacketHandled(true);
         }
 
-        public static void openGUI(Level world, Player player, BlockPos blockPos) {
-            NetworkHooks.openGui((ServerPlayer) player, (MenuProvider) world.getBlockEntity(blockPos), blockPos);
+        public static void openGUI(World world, PlayerEntity player, BlockPos blockPos) {
+            NetworkHooks.openGui((ServerPlayerEntity) player, (INamedContainerProvider) world.getBlockEntity(blockPos), blockPos);
         }
     }
 }
