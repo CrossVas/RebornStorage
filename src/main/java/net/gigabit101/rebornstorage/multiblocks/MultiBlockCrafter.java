@@ -7,8 +7,8 @@ import net.gigabit101.rebornstorage.core.multiblock.IMultiblockPart;
 import net.gigabit101.rebornstorage.core.multiblock.MultiblockControllerBase;
 import net.gigabit101.rebornstorage.core.multiblock.rectangular.RectangularMultiblockControllerBase;
 import net.gigabit101.rebornstorage.init.ModBlocks;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.Level;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.world.World;
 import net.minecraftforge.items.ItemStackHandler;
 
 import java.util.Map;
@@ -19,16 +19,16 @@ public class MultiBlockCrafter extends RectangularMultiblockControllerBase {
     public Map<Integer, ItemStackHandler> invs = new TreeMap<>();
     public int speed = 0;
     public int pages = 0;
-    public Level level;
+    public World level;
     public int currentPage = 1;
 
-    public MultiBlockCrafter(Level world) {
+    public MultiBlockCrafter(World world) {
         super(world);
         this.level = world;
     }
 
     @Override
-    public void onAttachedPartWithMultiblockData(IMultiblockPart iMultiblockPart, CompoundTag nbtTagCompound) {
+    public void onAttachedPartWithMultiblockData(IMultiblockPart iMultiblockPart, CompoundNBT nbtTagCompound) {
         readFromNBT(nbtTagCompound);
     }
 
@@ -153,22 +153,22 @@ public class MultiBlockCrafter extends RectangularMultiblockControllerBase {
     }
 
     @Override
-    public void writeToNBT(CompoundTag nbtTagCompound) {
+    public void writeToNBT(CompoundNBT nbtTagCompound) {
         nbtTagCompound.putInt("currentpage", currentPage);
     }
 
     @Override
-    public void readFromNBT(CompoundTag nbtTagCompound) {
+    public void readFromNBT(CompoundNBT nbtTagCompound) {
         currentPage = nbtTagCompound.getInt("currentpage");
     }
 
     @Override
-    public void formatDescriptionPacket(CompoundTag nbtTagCompound) {
+    public void formatDescriptionPacket(CompoundNBT nbtTagCompound) {
         writeToNBT(nbtTagCompound);
     }
 
     @Override
-    public void decodeDescriptionPacket(CompoundTag nbtTagCompound) {
+    public void decodeDescriptionPacket(CompoundNBT nbtTagCompound) {
         readFromNBT(nbtTagCompound);
     }
 }
