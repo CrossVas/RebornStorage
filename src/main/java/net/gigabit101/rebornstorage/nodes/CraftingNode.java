@@ -4,31 +4,29 @@ import com.refinedmods.refinedstorage.api.autocrafting.ICraftingPattern;
 import com.refinedmods.refinedstorage.api.autocrafting.ICraftingPatternContainer;
 import com.refinedmods.refinedstorage.api.autocrafting.ICraftingPatternProvider;
 import com.refinedmods.refinedstorage.api.network.INetwork;
-import com.refinedmods.refinedstorage.api.network.node.INetworkNode;
 import com.refinedmods.refinedstorage.api.network.node.INetworkNodeManager;
 import com.refinedmods.refinedstorage.apiimpl.API;
 import com.refinedmods.refinedstorage.apiimpl.network.node.ConnectivityStateChangeCause;
 import com.refinedmods.refinedstorage.apiimpl.network.node.NetworkNode;
 import com.refinedmods.refinedstorage.inventory.item.BaseItemHandler;
 import com.refinedmods.refinedstorage.util.StackUtils;
-import net.gigabit101.rebornstorage.RebornStorage;
 import net.gigabit101.rebornstorage.RebornStorageConfig;
 import net.gigabit101.rebornstorage.RebornStorageEventHandler;
 import net.gigabit101.rebornstorage.blockentities.BlockEntityMultiCrafter;
 import net.gigabit101.rebornstorage.init.ModBlocks;
 import net.gigabit101.rebornstorage.Constants;
 import net.gigabit101.rebornstorage.multiblocks.MultiBlockCrafter;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.block.Block;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Direction;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
@@ -41,7 +39,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class CraftingNode extends NetworkNode implements ICraftingPatternContainer {
-    Level world;
+    World world;
     BlockPos pos;
     List<ICraftingPattern> actualPatterns = new ArrayList<>();
     @Nullable
@@ -55,7 +53,7 @@ public class CraftingNode extends NetworkNode implements ICraftingPatternContain
     public static int craftingSpeed = 5;
     public static int invUpdateTime = 5;
 
-    public CraftingNode(Level level, BlockPos pos) {
+    public CraftingNode(World level, BlockPos pos) {
         super(level, pos);
         this.world = level;
         this.pos = pos;
@@ -182,11 +180,11 @@ public class CraftingNode extends NetworkNode implements ICraftingPatternContain
 
     @Nullable
     public BlockEntityMultiCrafter getTile() {
-        BlockEntity tileEntity = world.getBlockEntity(pos);
+        TileEntity tileEntity = world.getBlockEntity(pos);
         if (tileEntity instanceof BlockEntityMultiCrafter) {
             return (BlockEntityMultiCrafter) tileEntity;
         }
-        INetworkNodeManager manager = API.instance().getNetworkNodeManager((ServerLevel) level);
+        INetworkNodeManager manager = API.instance().getNetworkNodeManager((ServerWorld) world);
         manager.removeNode(getPos());
 
 //        RebornStorage.logger.warning(tileEntity + " is not an instance of TileMultiCrafter, this is an error and your RebornStorage multiblock may not work. Please report to the mod author");
@@ -273,13 +271,13 @@ public class CraftingNode extends NetworkNode implements ICraftingPatternContain
     }
 
     @Override
-    public CompoundTag write(CompoundTag nbtTagCompound) {
+    public CompoundNBT write(CompoundNBT nbtTagCompound) {
         StackUtils.writeItems(patterns, 0, nbtTagCompound);
         return nbtTagCompound;
     }
 
     @Override
-    public void read(CompoundTag tag) {
+    public void read(CompoundNBT tag) {
         StackUtils.readItems(patterns, 0, tag);
         super.read(tag);
     }
@@ -290,7 +288,7 @@ public class CraftingNode extends NetworkNode implements ICraftingPatternContain
     }
 
     @Override
-    public Level getLevel() {
+    public World getWorld() {
         return world;
     }
 
@@ -298,7 +296,7 @@ public class CraftingNode extends NetworkNode implements ICraftingPatternContain
     public void markDirty() {
         if (world != null && !world.isClientSide) {
             try {
-                INetworkNodeManager networkNodeManager = API.instance().getNetworkNodeManager((ServerLevel) world);
+                INetworkNodeManager networkNodeManager = API.instance().getNetworkNodeManager((ServerWorld) world);
                 if (networkNodeManager != null) {
                     networkNodeManager.markForSaving();
                 }
@@ -368,13 +366,15 @@ public class CraftingNode extends NetworkNode implements ICraftingPatternContain
         return null;
     }
 
+    @Nullable
     @Override
-    public BlockEntity getConnectedBlockEntity() {
+    public TileEntity getConnectedTile() {
         return null;
     }
 
+    @Nullable
     @Override
-    public BlockEntity getFacingBlockEntity() {
+    public TileEntity getFacingTile() {
         return null;
     }
 
@@ -397,8 +397,8 @@ public class CraftingNode extends NetworkNode implements ICraftingPatternContain
     }
 
     @Override
-    public Component getName() {
-        return new TextComponent("MultiBlock Crafter");
+    public ITextComponent getName() {
+        return new StringTextComponent("MultiBlock Crafter");
     }
 
     @Override

@@ -9,20 +9,21 @@ import com.refinedmods.refinedstorage.item.UpgradeItem;
 import com.refinedmods.refinedstorage.util.StackUtils;
 import net.gigabit101.rebornstorage.Constants;
 import net.gigabit101.rebornstorage.RebornStorageConfig;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.Level;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.Direction;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraftforge.items.IItemHandler;
-import org.jetbrains.annotations.Nullable;
+
+import javax.annotation.Nullable;
 
 public class AdvancedWirelessTransmitterNode extends NetworkNode implements IWirelessTransmitter {
     public static final ResourceLocation ID = new ResourceLocation(Constants.MOD_ID, "advanced_wireless_transmitter");
     private final UpgradeItemHandler upgrades = (UpgradeItemHandler) new UpgradeItemHandler(4, UpgradeItem.Type.RANGE).addListener(new NetworkNodeInventoryListener(this));
 
-    public AdvancedWirelessTransmitterNode(Level level, BlockPos pos) {
+    public AdvancedWirelessTransmitterNode(World level, BlockPos pos) {
         super(level, pos);
     }
 
@@ -37,8 +38,8 @@ public class AdvancedWirelessTransmitterNode extends NetworkNode implements IWir
     }
 
     @Override
-    public ResourceKey<Level> getDimension() {
-        return this.level.dimension();
+    public RegistryKey<World> getDimension() {
+        return this.world.dimension();
     }
 
     @Override
@@ -53,7 +54,7 @@ public class AdvancedWirelessTransmitterNode extends NetworkNode implements IWir
 
     @Override
     public void visit(Operator operator) {
-        operator.apply(this.level, this.pos.relative(Direction.DOWN), Direction.UP);
+        operator.apply(this.world, this.pos.relative(Direction.DOWN), Direction.UP);
     }
 
     @Override
@@ -62,13 +63,13 @@ public class AdvancedWirelessTransmitterNode extends NetworkNode implements IWir
     }
 
     @Override
-    public void read(CompoundTag tag) {
+    public void read(CompoundNBT tag) {
         super.read(tag);
         StackUtils.readItems(upgrades, 0, tag);
     }
 
     @Override
-    public CompoundTag write(CompoundTag tag) {
+    public CompoundNBT write(CompoundNBT tag) {
         super.write(tag);
         StackUtils.writeItems(upgrades, 0, tag);
         return tag;
